@@ -68,7 +68,7 @@ export default function DateOfBirthScreen({
     }
 
     Alert.alert(
-      "Date Confirmed \u2705",
+      "Date Confirmed!",
       `Your date of birth has been set to:\n\n${selectedDay} ${selectedMonth} ${selectedYear}\n\nYou can change this anytime from your profile.`,
     );
   };

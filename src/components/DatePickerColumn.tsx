@@ -27,7 +27,6 @@ interface PickerItemProps {
   item: string;
   index: number;
   itemHeight: number;
-  selectedIndex: number;
   scrollY: SharedValue<number>;
 }
 
@@ -35,17 +34,16 @@ const MemoizedPickerItem = React.memo(function PickerItem({
   item,
   index,
   itemHeight,
-  selectedIndex,
   scrollY,
 }: PickerItemProps) {
-  const animatedTextStyle = useAnimatedStyle(() => {
+  const animatedRegularStyle = useAnimatedStyle(() => {
     const distanceFromCenter = Math.abs(scrollY.value / itemHeight - index);
 
     return {
       opacity: interpolate(
         distanceFromCenter,
-        [0, 1, 2, 3],
-        [1, 0.7, 0.36, 0.14],
+        [0, 0.5, 1, 2, 3],
+        [0, 0.3, 0.7, 0.36, 0.14],
         Extrapolation.CLAMP,
       ),
       color: interpolateColor(
@@ -61,6 +59,20 @@ const MemoizedPickerItem = React.memo(function PickerItem({
     };
   }, [index, itemHeight, scrollY]);
 
+  const animatedBoldStyle = useAnimatedStyle(() => {
+    const distanceFromCenter = Math.abs(scrollY.value / itemHeight - index);
+
+    return {
+      opacity: interpolate(
+        distanceFromCenter,
+        [0, 0.5, 1],
+        [1, 0, 0],
+        Extrapolation.CLAMP,
+      ),
+      color: COLORS.textPrimary,
+    };
+  }, [index, itemHeight, scrollY]);
+
   return (
     <View style={[styles.row, { height: itemHeight }]}>
       <Animated.Text
@@ -68,14 +80,24 @@ const MemoizedPickerItem = React.memo(function PickerItem({
         style={[
           styles.text,
           {
-            lineHeight: Math.round(itemHeight * 0.66),
-            fontFamily:
-              selectedIndex === index
-                ? TYPOGRAPHY.mediumFamily
-                : TYPOGRAPHY.regularFamily,
-            fontWeight: selectedIndex === index ? "600" : "400",
+            fontFamily: TYPOGRAPHY.regularFamily,
+            fontWeight: "400",
           },
-          animatedTextStyle,
+          animatedRegularStyle,
+        ]}
+      >
+        {item}
+      </Animated.Text>
+      <Animated.Text
+        allowFontScaling={false}
+        style={[
+          styles.text,
+          styles.boldTextOverlay,
+          {
+            fontFamily: TYPOGRAPHY.mediumFamily,
+            fontWeight: "600",
+          },
+          animatedBoldStyle,
         ]}
       >
         {item}
@@ -187,9 +209,6 @@ export default function DatePickerColumn({
 
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      requestAnimationFrame(() => {
-        scrollRef.current?.scrollTo({ y: targetOffset, animated: false });
-      });
       return;
     }
 
@@ -214,11 +233,10 @@ export default function DatePickerColumn({
           item={item}
           index={index}
           itemHeight={itemHeight}
-          selectedIndex={selectedIndex}
           scrollY={scrollY}
         />
       )),
-    [items, itemHeight, selectedIndex, scrollY],
+    [items, itemHeight, scrollY],
   );
 
   return (
@@ -228,6 +246,7 @@ export default function DatePickerColumn({
         accessibilityLabel={accessibilityLabel}
         style={{ height: pickerHeight }}
         contentContainerStyle={contentContainerStyle}
+        contentOffset={{ x: 0, y: selectedIndex * itemHeight }}
         showsVerticalScrollIndicator={false}
         bounces={false}
         overScrollMode="never"
@@ -262,5 +281,8 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     textAlignVertical: "center",
     fontVariant: ["tabular-nums"],
+  },
+  boldTextOverlay: {
+    position: "absolute",
   },
 });
