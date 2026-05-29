@@ -43,7 +43,7 @@ const MemoizedPickerItem = React.memo(function PickerItem({
       opacity: interpolate(
         distanceFromCenter,
         [0, 0.5, 1, 2, 3],
-        [0, 0.3, 0.7, 0.36, 0.14],
+        [0, 0.3, 0.7, 0.45, 0.25],
         Extrapolation.CLAMP,
       ),
       color: interpolateColor(
@@ -52,8 +52,8 @@ const MemoizedPickerItem = React.memo(function PickerItem({
         [
           COLORS.textPrimary,
           "#9FA3A8",
-          COLORS.textFaded,
-          COLORS.textInactive,
+          "#ABADB3",
+          "#B9BCC2",
         ],
       ),
     };
@@ -164,13 +164,8 @@ const DatePickerColumn = React.memo(function DatePickerColumn({
 
       isInternalChange.current = true;
       onChange(nextIndex);
-
-      const exactOffset = nextIndex * itemHeight;
-      if (Math.abs(offsetY - exactOffset) > 1) {
-        listRef.current?.scrollToOffset({ offset: exactOffset, animated: true });
-      }
     },
-    [itemHeight, onChange, resolveIndexFromOffset],
+    [onChange, resolveIndexFromOffset],
   );
 
   const handleScrollEndDrag = useCallback(

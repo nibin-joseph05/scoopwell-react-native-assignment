@@ -14,8 +14,8 @@ export const TYPOGRAPHY = {
     android: "sans-serif-medium",
     default: "System",
   }),
-  titleSize: 24,
-  subtitleSize: 16,
-  pickerSize: 26,
+  titleSize: 28,
+  subtitleSize: 15,
+  pickerSize: 32,
   buttonTextSize: 18,
 };

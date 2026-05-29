@@ -1,50 +1,41 @@
-# Welcome to your Expo app 👋
+# Scoopwell React Native Assignment
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This repository contains the solution for the React Native UI challenge assigned by Scoopwell for the Fullstack Developer role. The core objective of this assignment was to perfectly replicate a sophisticated, fluid, and heavily animated natively-driven Date of Birth Picker based on a provided reference design.
 
-## Get started
+## Reference Design
 
-1. Install dependencies
+Below is the strict design reference utilized to construct this screen:
 
-   ```bash
-   npm install
-   ```
+![Reference Design](./Default.png)
 
-2. Start the app
+## Objective & Implementation Features
 
-   ```bash
-   npx expo start
-   ```
+The challenge was not just to build a functional date picker, but to achieve true 60fps native performance and pixel-perfect design alignment across iOS and Android. This implementation avoids third-party picker libraries and builds a highly optimized custom solution using Reanimated.
 
-In the output, you'll find options to open the app in a
+- **Native-Thread Animations**: All scroll mechanics, typography crossfading, and opacity interpolations are mapped strictly over the native UI bridge via `react-native-reanimated`.
+- **Intelligent Virtualization**: Implemented custom `Animated.FlatList` virtualization to handle hundreds of date options (e.g., 100+ years) rendering simultaneously without dropping frames, completely circumventing typical React reconciliation UI lag.
+- **Dynamic Date Logic**: Complex leap year and month-end boundary evaluations ensure days elegantly adjust natively (e.g. going from January 31 to February snaps exactly to February 28/29 natively).
+- **Pixel-Perfect Styling**: Accurate typography scaling, responsive item heights, and native `initialScrollIndex` overrides guarantee the wheels settle exactly on the intended index without artificial mechanical bounce.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Codebase Architecture
 
-## Get a fresh project
+The project is structured in a highly scalable and modular way to ensure clean code separation:
 
-When you're ready, run:
+### 📱 `src/screens/DateOfBirthScreen.tsx`
+The primary layout coordinator. It visually frames the picker, manages the structural screen dimensions, and links the typography, progress dots, buttons, and individual Date picker columns together without forcing artificial flex clipping.
 
-```bash
-npm run reset-project
-```
+### ⚙️ `src/components/DatePickerColumn.tsx`
+The powerhouse of the native UI. This component transforms a standard list of array strings into an Apple-style infinite wheel. It manages:
+- **`useAnimatedScrollHandler`**: Reads native scroll velocities.
+- **Crossfading Opacity interpolations**: Blends a regular text node and a bold text node asynchronously based purely on their exact mathematical distance from the screen center.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 🪝 `src/hooks/useDateOfBirthPicker.ts`
+The brain of the date state. It handles the raw calculations mapping physical indices to actual dates. Wrapped meticulously in stable `useCallback` configurations so that a selection in the Year column does not trigger expensive React re-renders in the Day and Month columns.
 
-## Learn more
+### 🧮 `src/utils/dateUtils.ts`
+Pure function utilities for calendar generation. Supplies isolated math to determine if a selected year is a Leap year, calculates accurate day counts accurately to prevent out-of-bounds scrolling, and mathematically clamps arrays.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 🎨 `src/constants/` (`colors.ts`, `typography.ts`, `spacing.ts`)
+The design system core holding the exact hex layers, spacing dimensions, and custom font weights inferred from the Scoopwell design file to ensure pixel-perfect fidelity across different mobile screen sizes.

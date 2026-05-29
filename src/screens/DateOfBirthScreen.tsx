@@ -25,11 +25,11 @@ export default function DateOfBirthScreen({
   const heightRatio = height / 874;
 
   const horizontalPadding = Math.round(SPACING.screenHorizontal * widthRatio);
-  const pickerItemHeight = Math.max(54, Math.min(60, Math.round(58 * heightRatio)));
+  const pickerItemHeight = Math.max(42, Math.min(48, Math.round(44 * heightRatio)));
   const dotsMarginTop = Math.max(8, Math.round(34 * heightRatio));
   const dotsMarginBottom = Math.max(20, Math.round(30 * heightRatio));
   const subtitleMarginTop = Math.max(6, Math.round(8 * heightRatio));
-  const pickerMarginTop = Math.max(18, Math.round(24 * heightRatio));
+  const pickerMarginTop = Math.max(32, Math.round(44 * heightRatio));
   const buttonBottomGap = Math.max(10, Math.round(14 * heightRatio));
 
   const {
@@ -88,9 +88,7 @@ export default function DateOfBirthScreen({
           Tell us your current age to personalize your plan.
         </Text>
 
-        <View style={[styles.divider, { marginTop: pickerMarginTop }]} />
-
-        <View style={[styles.pickerContainer, { marginTop: 0 }]}>
+        <View style={[styles.pickerContainer, { marginTop: pickerMarginTop }]}>
           <DatePickerColumn
             accessibilityLabel="Day picker"
             items={dayOptions}
@@ -118,6 +116,8 @@ export default function DateOfBirthScreen({
             itemHeight={pickerItemHeight}
           />
         </View>
+
+        <View style={{ flex: 1 }} />
 
         <BottomButtons
           onPrevious={handlePrevious}
@@ -153,16 +153,10 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
 
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: "#E8E8E8",
-  },
-
   pickerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "stretch",
-    flex: 1,
+    alignItems: "center",
   },
 
   dayColumn: {
