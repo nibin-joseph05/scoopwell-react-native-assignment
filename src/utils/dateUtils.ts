@@ -1,4 +1,4 @@
-export const DEFAULT_START_YEAR = 1900;
+export const DEFAULT_START_YEAR = 1980;
 export const DEFAULT_END_YEAR = 2030;
 
 export function clamp(value: number, min: number, max: number): number {

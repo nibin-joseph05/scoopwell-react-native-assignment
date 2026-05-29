@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { MONTH_OPTIONS } from "../data/dateData";
 import {
-  buildDayOptions,
   buildYearOptions,
   clamp,
   DEFAULT_END_YEAR,
   DEFAULT_START_YEAR,
+  getDaysInMonth,
 } from "../utils/dateUtils";
 
 interface UseDateOfBirthPickerResult {
@@ -44,9 +44,10 @@ export function useDateOfBirthPicker(): UseDateOfBirthPickerResult {
   );
   const [selectedDay, setSelectedDay] = useState<number>(DEFAULT_DATE.day);
 
+  const daysInMonth = getDaysInMonth(selectedMonthIndex, selectedYear);
   const dayOptions = useMemo(
-    () => buildDayOptions(selectedMonthIndex, selectedYear),
-    [selectedMonthIndex, selectedYear],
+    () => Array.from({ length: daysInMonth }, (_, index) => String(index + 1).padStart(2, "0")),
+    [daysInMonth],
   );
 
   useEffect(() => {
@@ -75,17 +76,17 @@ export function useDateOfBirthPicker(): UseDateOfBirthPickerResult {
     selectedMonthIndex,
     selectedYearIndex,
     selectedDate,
-    setSelectedDayIndex: (index: number) => {
+    setSelectedDayIndex: useCallback((index: number) => {
       const nextIndex = clamp(index, 0, dayOptions.length - 1);
       setSelectedDay(nextIndex + 1);
-    },
-    setSelectedMonthIndex: (index: number) => {
+    }, [dayOptions.length]),
+    setSelectedMonthIndex: useCallback((index: number) => {
       const nextIndex = clamp(index, 0, MONTH_OPTIONS.length - 1);
       setSelectedMonthIndex(nextIndex);
-    },
-    setSelectedYearIndex: (index: number) => {
+    }, []),
+    setSelectedYearIndex: useCallback((index: number) => {
       const nextIndex = clamp(index, 0, yearOptions.length - 1);
       setSelectedYear(Number(yearOptions[nextIndex]));
-    },
+    }, [yearOptions]),
   };
 }

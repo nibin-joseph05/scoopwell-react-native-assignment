@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
+  FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
-  ScrollView,
   StyleProp,
   StyleSheet,
   View,
@@ -116,9 +116,7 @@ interface DatePickerColumnProps {
   visibleItemCount?: number;
 }
 
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
-
-export default function DatePickerColumn({
+const DatePickerColumn = React.memo(function DatePickerColumn({
   items,
   selectedIndex,
   onChange,
@@ -130,7 +128,7 @@ export default function DatePickerColumn({
   const pickerHeight = itemHeight * visibleItemCount;
   const edgePadding = (pickerHeight - itemHeight) / 2;
 
-  const scrollRef = useRef<ScrollView | null>(null);
+  const listRef = useRef<FlatList<string> | null>(null);
   const scrollY = useSharedValue(selectedIndex * itemHeight);
 
   const isDragging = useRef(false);
@@ -166,8 +164,13 @@ export default function DatePickerColumn({
 
       isInternalChange.current = true;
       onChange(nextIndex);
+
+      const exactOffset = nextIndex * itemHeight;
+      if (Math.abs(offsetY - exactOffset) > 1) {
+        listRef.current?.scrollToOffset({ offset: exactOffset, animated: true });
+      }
     },
-    [onChange, resolveIndexFromOffset],
+    [itemHeight, onChange, resolveIndexFromOffset],
   );
 
   const handleScrollEndDrag = useCallback(
@@ -183,7 +186,7 @@ export default function DatePickerColumn({
         isInternalChange.current = true;
         onChange(nextIndex);
 
-        scrollRef.current?.scrollTo({ y: snapOffset, animated: true });
+        listRef.current?.scrollToOffset({ offset: snapOffset, animated: true });
       }
     },
     [itemHeight, onChange, resolveIndexFromOffset],
@@ -192,6 +195,32 @@ export default function DatePickerColumn({
   const handleScrollBeginDrag = useCallback(() => {
     isDragging.current = true;
   }, []);
+
+  const keyExtractor = useCallback(
+    (item: string, index: number) => `${item}-${index}`,
+    [],
+  );
+
+  const getItemLayout = useCallback(
+    (_: ArrayLike<string> | null | undefined, index: number) => ({
+      index,
+      length: itemHeight,
+      offset: itemHeight * index,
+    }),
+    [itemHeight],
+  );
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: string; index: number }) => (
+      <MemoizedPickerItem
+        item={item}
+        index={index}
+        itemHeight={itemHeight}
+        scrollY={scrollY}
+      />
+    ),
+    [itemHeight, scrollY],
+  );
 
   useEffect(() => {
     const targetOffset = selectedIndex * itemHeight;
@@ -214,8 +243,8 @@ export default function DatePickerColumn({
 
     const timer = setTimeout(
       () => {
-        scrollRef.current?.scrollTo({
-          y: targetOffset,
+        listRef.current?.scrollToOffset({
+          offset: targetOffset,
           animated: itemCountChanged,
         });
       },
@@ -225,32 +254,25 @@ export default function DatePickerColumn({
     return () => clearTimeout(timer);
   }, [itemHeight, scrollY, selectedIndex, items.length]);
 
-  const renderedItems = useMemo(
-    () =>
-      items.map((item, index) => (
-        <MemoizedPickerItem
-          key={`${item}-${index}`}
-          item={item}
-          index={index}
-          itemHeight={itemHeight}
-          scrollY={scrollY}
-        />
-      )),
-    [items, itemHeight, scrollY],
-  );
-
   return (
     <View style={[styles.container, { height: pickerHeight }, columnStyle]}>
-      <AnimatedScrollView
-        ref={scrollRef}
+      <Animated.FlatList
+        ref={listRef}
         accessibilityLabel={accessibilityLabel}
+        data={items}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         style={{ height: pickerHeight }}
         contentContainerStyle={contentContainerStyle}
-        contentOffset={{ x: 0, y: selectedIndex * itemHeight }}
+        initialScrollIndex={selectedIndex}
         showsVerticalScrollIndicator={false}
         bounces={false}
         overScrollMode="never"
         scrollsToTop={false}
+        initialNumToRender={12}
+        maxToRenderPerBatch={8}
+        windowSize={5}
+        getItemLayout={getItemLayout}
         decelerationRate={Platform.OS === "ios" ? 0.993 : 0.988}
         snapToInterval={itemHeight}
         snapToAlignment="start"
@@ -258,14 +280,13 @@ export default function DatePickerColumn({
         onScroll={scrollHandler}
         onScrollEndDrag={handleScrollEndDrag}
         onMomentumScrollEnd={settleToNearestIndex}
-        scrollEventThrottle={1}
-        nestedScrollEnabled
-      >
-        {renderedItems}
-      </AnimatedScrollView>
+        scrollEventThrottle={16}
+      />
     </View>
   );
-}
+});
+
+export default DatePickerColumn;
 
 const styles = StyleSheet.create({
   container: {
