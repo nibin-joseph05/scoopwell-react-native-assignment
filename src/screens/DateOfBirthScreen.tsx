@@ -55,7 +55,10 @@ export default function DateOfBirthScreen({
       return;
     }
 
-    Alert.alert("Previous", "Hook up your previous-step navigation here.");
+    Alert.alert(
+      "Going Back",
+      "You can return to the previous step anytime to update your details.",
+    );
   };
 
   const handleNext = () => {
@@ -65,8 +68,8 @@ export default function DateOfBirthScreen({
     }
 
     Alert.alert(
-      "Date of birth selected",
-      `${selectedDay} ${selectedMonth} ${selectedYear}\n${selectedDate.toDateString()}`,
+      "Date Confirmed \u2705",
+      `Your date of birth has been set to:\n\n${selectedDay} ${selectedMonth} ${selectedYear}\n\nYou can change this anytime from your profile.`,
     );
   };
 
@@ -85,7 +88,9 @@ export default function DateOfBirthScreen({
           Tell us your current age to personalize your plan.
         </Text>
 
-        <View style={[styles.pickerContainer, { marginTop: pickerMarginTop }]}>
+        <View style={[styles.divider, { marginTop: pickerMarginTop }]} />
+
+        <View style={[styles.pickerContainer, { marginTop: 0 }]}>
           <DatePickerColumn
             accessibilityLabel="Day picker"
             items={dayOptions}
@@ -148,10 +153,15 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
 
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#E8E8E8",
+  },
+
   pickerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "stretch",
     flex: 1,
   },
 

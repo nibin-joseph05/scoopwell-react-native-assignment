@@ -5,6 +5,7 @@ import {
   buildDayOptions,
   buildYearOptions,
   clamp,
+  DEFAULT_END_YEAR,
   DEFAULT_START_YEAR,
 } from "../utils/dateUtils";
 
@@ -29,7 +30,7 @@ const DEFAULT_DATE = {
 
 export function useDateOfBirthPicker(): UseDateOfBirthPickerResult {
   const yearOptions = useMemo(
-    () => buildYearOptions(DEFAULT_START_YEAR, new Date().getFullYear()),
+    () => buildYearOptions(DEFAULT_START_YEAR, DEFAULT_END_YEAR),
     [],
   );
 

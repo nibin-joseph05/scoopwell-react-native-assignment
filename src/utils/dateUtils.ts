@@ -1,4 +1,5 @@
 export const DEFAULT_START_YEAR = 1900;
+export const DEFAULT_END_YEAR = 2030;
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -34,7 +35,7 @@ export function buildDayOptions(monthIndex: number, year: number): string[] {
 
 export function buildYearOptions(
   startYear = DEFAULT_START_YEAR,
-  endYear = new Date().getFullYear(),
+  endYear = DEFAULT_END_YEAR,
 ): string[] {
   const count = Math.max(endYear - startYear + 1, 1);
 

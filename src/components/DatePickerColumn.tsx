@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-  FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
+  ScrollView,
   StyleProp,
   StyleSheet,
   View,
@@ -14,6 +14,7 @@ import Animated, {
   interpolate,
   interpolateColor,
   type SharedValue,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
@@ -21,16 +22,6 @@ import Animated, {
 import { COLORS } from "../constants/colors";
 import { TYPOGRAPHY } from "../constants/typography";
 import { clamp } from "../utils/dateUtils";
-
-interface DatePickerColumnProps {
-  items: string[];
-  selectedIndex: number;
-  onChange: (index: number) => void;
-  accessibilityLabel: string;
-  columnStyle?: StyleProp<ViewStyle>;
-  itemHeight?: number;
-  visibleItemCount?: number;
-}
 
 interface PickerItemProps {
   item: string;
@@ -40,7 +31,7 @@ interface PickerItemProps {
   scrollY: SharedValue<number>;
 }
 
-function PickerItem({
+const MemoizedPickerItem = React.memo(function PickerItem({
   item,
   index,
   itemHeight,
@@ -91,7 +82,19 @@ function PickerItem({
       </Animated.Text>
     </View>
   );
+});
+
+interface DatePickerColumnProps {
+  items: string[];
+  selectedIndex: number;
+  onChange: (index: number) => void;
+  accessibilityLabel: string;
+  columnStyle?: StyleProp<ViewStyle>;
+  itemHeight?: number;
+  visibleItemCount?: number;
 }
+
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export default function DatePickerColumn({
   items,
@@ -105,8 +108,13 @@ export default function DatePickerColumn({
   const pickerHeight = itemHeight * visibleItemCount;
   const edgePadding = (pickerHeight - itemHeight) / 2;
 
-  const listRef = useRef<FlatList<string> | null>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
   const scrollY = useSharedValue(selectedIndex * itemHeight);
+
+  const isDragging = useRef(false);
+  const prevItemCount = useRef(items.length);
+  const isInitialMount = useRef(true);
+  const isInternalChange = useRef(false);
 
   const contentContainerStyle = useMemo(
     () => ({
@@ -115,99 +123,135 @@ export default function DatePickerColumn({
     [edgePadding],
   );
 
-  const keyExtractor = useCallback((item: string, index: number) => `${item}-${index}`, []);
-
-  const getItemLayout = useCallback(
-    (_: ArrayLike<string> | null | undefined, index: number) => ({
-      index,
-      length: itemHeight,
-      offset: itemHeight * index,
-    }),
-    [itemHeight],
-  );
-
   const resolveIndexFromOffset = useCallback(
     (offsetY: number) =>
-      clamp(Math.floor((offsetY + itemHeight / 2) / itemHeight), 0, items.length - 1),
+      clamp(Math.round(offsetY / itemHeight), 0, items.length - 1),
     [itemHeight, items.length],
   );
 
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   const settleToNearestIndex = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      isDragging.current = false;
+
       const offsetY = event.nativeEvent.contentOffset.y;
       const nextIndex = resolveIndexFromOffset(offsetY);
 
+      isInternalChange.current = true;
       onChange(nextIndex);
+    },
+    [onChange, resolveIndexFromOffset],
+  );
 
-      listRef.current?.scrollToOffset({
-        offset: nextIndex * itemHeight,
-        animated: true,
-      });
+  const handleScrollEndDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      isDragging.current = false;
+
+      const velocity = event.nativeEvent.velocity?.y ?? 0;
+      if (Math.abs(velocity) < 0.05) {
+        const offsetY = event.nativeEvent.contentOffset.y;
+        const nextIndex = resolveIndexFromOffset(offsetY);
+        const snapOffset = nextIndex * itemHeight;
+
+        isInternalChange.current = true;
+        onChange(nextIndex);
+
+        scrollRef.current?.scrollTo({ y: snapOffset, animated: true });
+      }
     },
     [itemHeight, onChange, resolveIndexFromOffset],
   );
 
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollY.value = event.nativeEvent.contentOffset.y;
-    },
-    [scrollY],
-  );
-
-  const renderItem = useCallback(
-    ({ item, index }: { item: string; index: number }) => (
-      <PickerItem
-        item={item}
-        index={index}
-        itemHeight={itemHeight}
-        selectedIndex={selectedIndex}
-        scrollY={scrollY}
-      />
-    ),
-    [itemHeight, scrollY, selectedIndex],
-  );
+  const handleScrollBeginDrag = useCallback(() => {
+    isDragging.current = true;
+  }, []);
 
   useEffect(() => {
     const targetOffset = selectedIndex * itemHeight;
+    const itemCountChanged = prevItemCount.current !== items.length;
+    prevItemCount.current = items.length;
+
     scrollY.value = targetOffset;
 
-    listRef.current?.scrollToOffset({
-      offset: targetOffset,
-      animated: false,
-    });
-  }, [itemHeight, scrollY, selectedIndex]);
+    if (isDragging.current) return;
+
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({ y: targetOffset, animated: false });
+      });
+      return;
+    }
+
+    const timer = setTimeout(
+      () => {
+        scrollRef.current?.scrollTo({
+          y: targetOffset,
+          animated: itemCountChanged,
+        });
+      },
+      itemCountChanged ? 50 : 0,
+    );
+
+    return () => clearTimeout(timer);
+  }, [itemHeight, scrollY, selectedIndex, items.length]);
+
+  const renderedItems = useMemo(
+    () =>
+      items.map((item, index) => (
+        <MemoizedPickerItem
+          key={`${item}-${index}`}
+          item={item}
+          index={index}
+          itemHeight={itemHeight}
+          selectedIndex={selectedIndex}
+          scrollY={scrollY}
+        />
+      )),
+    [items, itemHeight, selectedIndex, scrollY],
+  );
 
   return (
     <View style={[styles.container, { height: pickerHeight }, columnStyle]}>
-      <Animated.FlatList
-        ref={listRef}
+      <AnimatedScrollView
+        ref={scrollRef}
         accessibilityLabel={accessibilityLabel}
-        data={items}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
         style={{ height: pickerHeight }}
         contentContainerStyle={contentContainerStyle}
         showsVerticalScrollIndicator={false}
         bounces={false}
         overScrollMode="never"
-        removeClippedSubviews={Platform.OS === "android"}
-        initialNumToRender={9}
-        maxToRenderPerBatch={9}
-        windowSize={7}
-        getItemLayout={getItemLayout}
-        decelerationRate={Platform.OS === "ios" ? "fast" : 0.985}
+        scrollsToTop={false}
+        decelerationRate={Platform.OS === "ios" ? 0.993 : 0.988}
         snapToInterval={itemHeight}
         snapToAlignment="start"
-        onScroll={handleScroll}
+        onScrollBeginDrag={handleScrollBeginDrag}
+        onScroll={scrollHandler}
+        onScrollEndDrag={handleScrollEndDrag}
         onMomentumScrollEnd={settleToNearestIndex}
-        scrollEventThrottle={16}
-      />
+        scrollEventThrottle={1}
+        nestedScrollEnabled
+      >
+        {renderedItems}
+      </AnimatedScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    overflow: "hidden",
+  },
   row: {
     justifyContent: "center",
     alignItems: "center",
