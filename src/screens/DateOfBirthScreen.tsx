@@ -25,11 +25,11 @@ export default function DateOfBirthScreen({
   const heightRatio = height / 874;
 
   const horizontalPadding = Math.round(SPACING.screenHorizontal * widthRatio);
-  const pickerItemHeight = Math.max(42, Math.min(48, Math.round(44 * heightRatio)));
+  const pickerItemHeight = Math.max(52, Math.min(58, Math.round(54 * heightRatio)));
   const dotsMarginTop = Math.max(8, Math.round(34 * heightRatio));
   const dotsMarginBottom = Math.max(20, Math.round(30 * heightRatio));
   const subtitleMarginTop = Math.max(6, Math.round(8 * heightRatio));
-  const pickerMarginTop = Math.max(32, Math.round(44 * heightRatio));
+  const pickerMarginTop = Math.max(40, Math.round(52 * heightRatio));
   const buttonBottomGap = Math.max(10, Math.round(14 * heightRatio));
 
   const {

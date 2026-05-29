@@ -16,6 +16,6 @@ export const TYPOGRAPHY = {
   }),
   titleSize: 28,
   subtitleSize: 15,
-  pickerSize: 32,
+  pickerSize: 39,
   buttonTextSize: 18,
 };
