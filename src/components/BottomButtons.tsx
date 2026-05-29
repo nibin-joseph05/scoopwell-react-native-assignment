@@ -1,15 +1,35 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { COLORS } from "../constants/colors";
+import { StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
-export default function BottomButtons() {
+import { COLORS } from "../constants/colors";
+import { TYPOGRAPHY } from "../constants/typography";
+
+interface BottomButtonsProps {
+  onPrevious: () => void;
+  onNext: () => void;
+  style?: StyleProp<ViewStyle>;
+}
+
+export default function BottomButtons({
+  onPrevious,
+  onNext,
+  style,
+}: BottomButtonsProps) {
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.previousButton}>
+    <View style={[styles.container, style]}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={onPrevious}
+        style={styles.previousButton}
+      >
         <Text style={styles.previousText}>Previous</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.nextButton}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={onNext}
+        style={styles.nextButton}
+      >
         <Text style={styles.nextText}>Next</Text>
       </TouchableOpacity>
     </View>
@@ -20,11 +40,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
   },
 
   previousButton: {
-    width: "46%",
+    width: "48.3%",
     height: 56,
     borderRadius: 28,
     borderWidth: 1,
@@ -34,7 +53,7 @@ const styles = StyleSheet.create({
   },
 
   nextButton: {
-    width: "46%",
+    width: "48.3%",
     height: 56,
     borderRadius: 28,
     backgroundColor: COLORS.primary,
@@ -43,12 +62,18 @@ const styles = StyleSheet.create({
   },
 
   previousText: {
-    fontSize: 18,
+    fontFamily: TYPOGRAPHY.mediumFamily,
+    fontSize: TYPOGRAPHY.buttonTextSize,
+    lineHeight: 22,
     fontWeight: "500",
+    color: COLORS.border,
   },
 
   nextText: {
-    fontSize: 18,
+    fontFamily: TYPOGRAPHY.mediumFamily,
+    fontSize: TYPOGRAPHY.buttonTextSize,
+    lineHeight: 22,
     fontWeight: "600",
+    color: "#111111",
   },
 });

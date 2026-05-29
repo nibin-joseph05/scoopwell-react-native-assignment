@@ -7,7 +7,5 @@ export const SPACING = {
   xxl: 48,
 
   screenHorizontal: 28,
-  screenTop: 40,
-
-  pickerGap: 24,
+  pickerGap: 20,
 };

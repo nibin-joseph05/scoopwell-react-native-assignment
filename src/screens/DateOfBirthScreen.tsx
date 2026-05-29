@@ -1,63 +1,170 @@
-import { SafeAreaView, Text, View, StyleSheet } from "react-native";
+import { Alert, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import ProgressDots from "../components/ProgressDots";
 import BottomButtons from "../components/BottomButtons";
 import DatePickerColumn from "../components/DatePickerColumn";
 
-import { days, months, years } from "../data/dateData";
+import { COLORS } from "../constants/colors";
+import { SPACING } from "../constants/spacing";
+import { TYPOGRAPHY } from "../constants/typography";
+import { useDateOfBirthPicker } from "../hooks/useDateOfBirthPicker";
 import { globalStyles } from "../styles/globalStyles";
 
-export default function DateOfBirthScreen() {
+interface DateOfBirthScreenProps {
+  onPrevious?: () => void;
+  onNext?: (date: Date) => void;
+}
+
+export default function DateOfBirthScreen({
+  onPrevious,
+  onNext,
+}: DateOfBirthScreenProps = {}) {
+  const { height, width } = useWindowDimensions();
+  const widthRatio = width / 402;
+  const heightRatio = height / 874;
+
+  const horizontalPadding = Math.round(SPACING.screenHorizontal * widthRatio);
+  const pickerItemHeight = Math.max(54, Math.min(60, Math.round(58 * heightRatio)));
+  const dotsMarginTop = Math.max(8, Math.round(34 * heightRatio));
+  const dotsMarginBottom = Math.max(20, Math.round(30 * heightRatio));
+  const subtitleMarginTop = Math.max(6, Math.round(8 * heightRatio));
+  const pickerMarginTop = Math.max(18, Math.round(24 * heightRatio));
+  const buttonBottomGap = Math.max(10, Math.round(14 * heightRatio));
+
+  const {
+    dayOptions,
+    monthOptions,
+    yearOptions,
+    selectedDayIndex,
+    selectedMonthIndex,
+    selectedYearIndex,
+    selectedDate,
+    setSelectedDayIndex,
+    setSelectedMonthIndex,
+    setSelectedYearIndex,
+  } = useDateOfBirthPicker();
+
+  const selectedMonth = monthOptions[selectedMonthIndex];
+  const selectedDay = dayOptions[selectedDayIndex];
+  const selectedYear = yearOptions[selectedYearIndex];
+
+  const handlePrevious = () => {
+    if (onPrevious) {
+      onPrevious();
+      return;
+    }
+
+    Alert.alert("Previous", "Hook up your previous-step navigation here.");
+  };
+
+  const handleNext = () => {
+    if (onNext) {
+      onNext(selectedDate);
+      return;
+    }
+
+    Alert.alert(
+      "Date of birth selected",
+      `${selectedDay} ${selectedMonth} ${selectedYear}\n${selectedDate.toDateString()}`,
+    );
+  };
+
   return (
-    <SafeAreaView style={globalStyles.screenContainer}>
-      <ProgressDots />
-
-      <Text style={styles.title}>
-        Choose your date of birth
-      </Text>
-
-      <Text style={styles.subtitle}>
-        Tell us your current age to personalize your plan.
-      </Text>
-
-      <View style={styles.pickerContainer}>
-        <DatePickerColumn
-          values={days.slice(20, 27)}
-          selectedIndex={3}
+    <SafeAreaView edges={["top", "bottom"]} style={globalStyles.screenContainer}>
+      <View style={[styles.contentContainer, { paddingHorizontal: horizontalPadding }]}>
+        <ProgressDots
+          currentStep={1}
+          totalSteps={5}
+          style={{ marginTop: dotsMarginTop, marginBottom: dotsMarginBottom }}
         />
 
-        <DatePickerColumn
-          values={months.slice(5, 12)}
-          selectedIndex={3}
-        />
+        <Text style={styles.title}>Choose your date of birth</Text>
 
-        <DatePickerColumn
-          values={years.slice(43, 50)}
-          selectedIndex={3}
+        <Text style={[styles.subtitle, { marginTop: subtitleMarginTop }]}>
+          Tell us your current age to personalize your plan.
+        </Text>
+
+        <View style={[styles.pickerContainer, { marginTop: pickerMarginTop }]}>
+          <DatePickerColumn
+            accessibilityLabel="Day picker"
+            items={dayOptions}
+            selectedIndex={selectedDayIndex}
+            onChange={setSelectedDayIndex}
+            columnStyle={styles.dayColumn}
+            itemHeight={pickerItemHeight}
+          />
+
+          <DatePickerColumn
+            accessibilityLabel="Month picker"
+            items={monthOptions}
+            selectedIndex={selectedMonthIndex}
+            onChange={setSelectedMonthIndex}
+            columnStyle={styles.monthColumn}
+            itemHeight={pickerItemHeight}
+          />
+
+          <DatePickerColumn
+            accessibilityLabel="Year picker"
+            items={yearOptions}
+            selectedIndex={selectedYearIndex}
+            onChange={setSelectedYearIndex}
+            columnStyle={styles.yearColumn}
+            itemHeight={pickerItemHeight}
+          />
+        </View>
+
+        <BottomButtons
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          style={{
+            marginHorizontal: Math.round(-10 * widthRatio),
+            marginBottom: buttonBottomGap,
+          }}
         />
       </View>
-
-      <BottomButtons />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+  },
+
   title: {
-    fontSize: 24,
+    fontFamily: TYPOGRAPHY.mediumFamily,
+    fontSize: TYPOGRAPHY.titleSize,
+    lineHeight: 33,
     fontWeight: "600",
+    color: "#1D1D1F",
+    letterSpacing: -0.2,
   },
 
   subtitle: {
-    fontSize: 16,
-    color: "#777",
-    marginTop: 10,
+    fontFamily: TYPOGRAPHY.regularFamily,
+    fontSize: TYPOGRAPHY.subtitleSize,
+    lineHeight: 23,
+    color: COLORS.textSecondary,
   },
 
   pickerContainer: {
-    flex: 1,
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    flex: 1,
+  },
+
+  dayColumn: {
+    flex: 0.95,
+  },
+
+  monthColumn: {
+    flex: 1.18,
+    marginHorizontal: SPACING.pickerGap,
+  },
+
+  yearColumn: {
+    flex: 1.17,
   },
 });

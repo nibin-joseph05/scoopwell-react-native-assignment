@@ -1,17 +1,19 @@
 export const COLORS = {
   background: "#FFFFFF",
 
-  primary: "#F8C51C",
+  primary: "#F9C719",
 
-  textPrimary: "#37261F",
+  textPrimary: "#483733",
 
-  textSecondary: "#767676",
+  textSecondary: "#70757B",
 
-  textInactive: "#E7E7E7",
+  textInactive: "#E5E5E7",
 
-  border: "#292929",
+  textFaded: "#D1D3D6",
+
+  border: "#262626",
 
   dotActive: "#111111",
 
-  dotInactive: "#D8D8D8",
+  dotInactive: "#D5D6D9",
 };

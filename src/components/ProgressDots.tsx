@@ -1,32 +1,51 @@
-import { View } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+
 import { COLORS } from "../constants/colors";
 
-export default function ProgressDots() {
+interface ProgressDotsProps {
+  currentStep?: number;
+  totalSteps?: number;
+  style?: StyleProp<ViewStyle>;
+}
+
+export default function ProgressDots({
+  currentStep = 1,
+  totalSteps = 5,
+  style,
+}: ProgressDotsProps) {
+  const steps = Array.from({ length: totalSteps }, (_, index) => index + 1);
+
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 8,
-        marginBottom: 28,
-      }}
-    >
-      {[0, 1, 2, 3, 4].map((dot) => (
+    <View style={[styles.container, style]}>
+      {steps.map((step) => (
         <View
-          key={dot}
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: 2.5,
-            marginHorizontal: 2.5,
-            backgroundColor:
-              dot === 0
-                ? COLORS.dotActive
-                : COLORS.dotInactive,
-          }}
+          key={step}
+          style={[
+            styles.dot,
+            step === currentStep ? styles.activeDot : styles.inactiveDot,
+          ]}
         />
       ))}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    marginHorizontal: 2.5,
+  },
+  activeDot: {
+    backgroundColor: COLORS.dotActive,
+  },
+  inactiveDot: {
+    backgroundColor: COLORS.dotInactive,
+  },
+});
