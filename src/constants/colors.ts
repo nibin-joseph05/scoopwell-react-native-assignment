@@ -7,9 +7,11 @@ export const COLORS = {
 
   textSecondary: "#70757B",
 
-  textInactive: "#E5E5E7",
+  textMuted: "#9FA3A8",
 
-  textFaded: "#D1D3D6",
+  textFaded: "#ABADB3",
+
+  textInactive: "#B9BCC2",
 
   border: "#262626",
 

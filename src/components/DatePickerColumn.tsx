@@ -27,6 +27,8 @@ interface PickerItemProps {
   item: string;
   index: number;
   itemHeight: number;
+  numericOnly: boolean;
+  textAlign: "center" | "flex-start";
   scrollY: SharedValue<number>;
 }
 
@@ -34,6 +36,8 @@ const MemoizedPickerItem = React.memo(function PickerItem({
   item,
   index,
   itemHeight,
+  numericOnly,
+  textAlign,
   scrollY,
 }: PickerItemProps) {
   const animatedRegularStyle = useAnimatedStyle(() => {
@@ -51,9 +55,9 @@ const MemoizedPickerItem = React.memo(function PickerItem({
         [0, 1, 2, 3],
         [
           COLORS.textPrimary,
-          "#9FA3A8",
-          "#ABADB3",
-          "#B9BCC2",
+          COLORS.textMuted,
+          COLORS.textFaded,
+          COLORS.textInactive,
         ],
       ),
     };
@@ -74,11 +78,12 @@ const MemoizedPickerItem = React.memo(function PickerItem({
   }, [index, itemHeight, scrollY]);
 
   return (
-    <View style={[styles.row, { height: itemHeight }]}>
+    <View style={[styles.row, { height: itemHeight, alignItems: textAlign }]}>
       <Animated.Text
         allowFontScaling={false}
         style={[
           styles.text,
+          numericOnly && styles.tabularNums,
           {
             fontFamily: TYPOGRAPHY.regularFamily,
             fontWeight: "400",
@@ -93,6 +98,7 @@ const MemoizedPickerItem = React.memo(function PickerItem({
         style={[
           styles.text,
           styles.boldTextOverlay,
+          numericOnly && styles.tabularNums,
           {
             fontFamily: TYPOGRAPHY.mediumFamily,
             fontWeight: "600",
@@ -112,6 +118,8 @@ interface DatePickerColumnProps {
   onChange: (index: number) => void;
   accessibilityLabel: string;
   columnStyle?: StyleProp<ViewStyle>;
+  numericOnly?: boolean;
+  textAlign?: "center" | "flex-start";
   itemHeight?: number;
   visibleItemCount?: number;
 }
@@ -122,6 +130,8 @@ const DatePickerColumn = React.memo(function DatePickerColumn({
   onChange,
   accessibilityLabel,
   columnStyle,
+  numericOnly = true,
+  textAlign = "center",
   itemHeight = 58,
   visibleItemCount = 7,
 }: DatePickerColumnProps) {
@@ -211,10 +221,12 @@ const DatePickerColumn = React.memo(function DatePickerColumn({
         item={item}
         index={index}
         itemHeight={itemHeight}
+        numericOnly={numericOnly}
+        textAlign={textAlign}
         scrollY={scrollY}
       />
     ),
-    [itemHeight, scrollY],
+    [itemHeight, numericOnly, textAlign, scrollY],
   );
 
   useEffect(() => {
@@ -296,6 +308,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.15,
     includeFontPadding: false,
     textAlignVertical: "center",
+  },
+  tabularNums: {
     fontVariant: ["tabular-nums"],
   },
   boldTextOverlay: {

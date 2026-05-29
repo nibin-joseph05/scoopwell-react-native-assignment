@@ -104,6 +104,8 @@ export default function DateOfBirthScreen({
             selectedIndex={selectedMonthIndex}
             onChange={setSelectedMonthIndex}
             columnStyle={styles.monthColumn}
+            numericOnly={false}
+            textAlign="flex-start"
             itemHeight={pickerItemHeight}
           />
 
@@ -166,6 +168,7 @@ const styles = StyleSheet.create({
   monthColumn: {
     flex: 1.18,
     marginHorizontal: SPACING.pickerGap,
+    paddingLeft: 16,
   },
 
   yearColumn: {
