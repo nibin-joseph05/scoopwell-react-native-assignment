@@ -1,5 +1,5 @@
-export const DEFAULT_START_YEAR = 1980;
-export const DEFAULT_END_YEAR = 2030;
+export const DEFAULT_END_YEAR = new Date().getFullYear();
+export const DEFAULT_START_YEAR = DEFAULT_END_YEAR - 60;
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
