@@ -47,7 +47,7 @@ const MemoizedPickerItem = React.memo(function PickerItem({
       opacity: interpolate(
         distanceFromCenter,
         [0, 0.5, 1, 2, 3],
-        [0, 0.3, 0.7, 0.45, 0.25],
+        [0, 0.3, 0.7, 0.45, 0.35],
         Extrapolation.CLAMP,
       ),
       color: interpolateColor(
@@ -101,7 +101,7 @@ const MemoizedPickerItem = React.memo(function PickerItem({
           numericOnly && styles.tabularNums,
           {
             fontFamily: TYPOGRAPHY.mediumFamily,
-            fontWeight: "600",
+            fontWeight: "500",
           },
           animatedBoldStyle,
         ]}

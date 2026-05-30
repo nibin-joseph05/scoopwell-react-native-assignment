@@ -88,6 +88,8 @@ export default function DateOfBirthScreen({
           Tell us your current age to personalize your plan.
         </Text>
 
+        <View style={styles.divider} />
+
         <View style={[styles.pickerContainer, { marginTop: pickerMarginTop }]}>
           <DatePickerColumn
             accessibilityLabel="Day picker"
@@ -105,7 +107,6 @@ export default function DateOfBirthScreen({
             onChange={setSelectedMonthIndex}
             columnStyle={styles.monthColumn}
             numericOnly={false}
-            textAlign="flex-start"
             itemHeight={pickerItemHeight}
           />
 
@@ -155,6 +156,13 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
 
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#E0E0E0",
+    marginTop: 14,
+    width: "100%",
+  },
+
   pickerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -168,7 +176,6 @@ const styles = StyleSheet.create({
   monthColumn: {
     flex: 1.18,
     marginHorizontal: SPACING.pickerGap,
-    paddingLeft: 16,
   },
 
   yearColumn: {

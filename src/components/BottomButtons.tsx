@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     fontFamily: TYPOGRAPHY.mediumFamily,
     fontSize: TYPOGRAPHY.buttonTextSize,
     lineHeight: 22,
-    fontWeight: "600",
+    fontWeight: "500",
     color: "#111111",
   },
 });

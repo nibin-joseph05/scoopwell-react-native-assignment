@@ -37,10 +37,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    marginHorizontal: 2.5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3,
   },
   activeDot: {
     backgroundColor: COLORS.dotActive,
